@@ -382,9 +382,11 @@ async function fetchEpisodeStream(episodeId) {
     if (videoUrl) {
       const fullUrl = resolveUrl(videoUrl, ep.embedUrl);
       console.log('[Bridge] URL vidéo extraite :', fullUrl);
+      const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+      const proxiedLink = `${bridgeOrigin}/proxy/video?url=${encodeURIComponent(fullUrl)}&referer=${encodeURIComponent(ep.embedUrl)}`;
       return {
         streamingLink: [{
-          link: fullUrl,
+          link: proxiedLink,
           type: fullUrl.includes('.m3u8') ? 'hls' : 'mp4',
           isEmbed: false,
           server: 'Sibnet',
@@ -406,7 +408,8 @@ async function fetchEpisodeStream(episodeId) {
     console.error('[Bridge] Échec de l\'extraction vidéo depuis Sibnet :', e.message);
   }
   // Fallback: proxy the Sibnet shell page through the bridge
-  const proxiedUrl = `/proxy/page?url=${encodeURIComponent(ep.embedUrl)}`;
+  const fallbackOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  const proxiedUrl = `${fallbackOrigin}/proxy/page?url=${encodeURIComponent(ep.embedUrl)}`;
   console.log('[Bridge] Utilisation du proxy de page :', proxiedUrl);
   return {
     streamingLink: [{
