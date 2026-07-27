@@ -475,6 +475,10 @@ export default function AnimePage() {
                   {totalEpisodes} au total
                 </span>
               </div>
+              {/* DEBUG: show state */}
+              <div className="text-xs text-muted-foreground bg-black/10 rounded p-2 font-mono">
+                loading={String(loadingEpisodes)} | data={String(!!episodesData)} | error={String(!!episodesError)} | total={totalEpisodes} | animeId="{contentAnimeId}"
+              </div>
               {hasEpisodeGroups && (
                 <div className="flex flex-wrap gap-2">
                   {episodeGroups.map((group, index) => {
