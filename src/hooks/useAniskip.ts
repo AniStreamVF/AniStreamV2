@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 
+const BRIDGE_ORIGIN = String(import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:4567');
+
 interface SkipTime {
   interval: {
     startTime: number;
@@ -37,45 +39,19 @@ export function useAniskip(initialSkipTimes: SkipTime[] = []) {
     setError(null);
 
     try {
-      // Use v2 API endpoint with proper array params
-      const v2Params = new URLSearchParams();
-      v2Params.append('types[]', 'op');
-      v2Params.append('types[]', 'ed');
-      v2Params.append('types[]', 'recap');
-
       const length = (typeof episodeLength === 'number' && !isNaN(episodeLength) && episodeLength > 0)
         ? Math.floor(episodeLength)
         : 1440;
-      v2Params.set('episodeLength', String(length));
 
-      const v2Url = `https://api.aniskip.com/v2/skip-times/${malId}/${episodeNumber}?${v2Params.toString()}`;
-      console.log('Fetching skip times from v2:', v2Url);
+      const proxyUrl = `${BRIDGE_ORIGIN}/aniskip?malId=${malId}&ep=${episodeNumber}&length=${length}`;
+      console.log('Fetching skip times via bridge proxy:', proxyUrl);
 
-      let response = await fetch(v2Url, {
+      const response = await fetch(proxyUrl, {
         headers: { 'Accept': 'application/json' },
       });
 
-      // Fallback to v1 if v2 fails or returns 404
-      if (response.status === 404 || !response.ok) {
-        console.log(`v2 failed with ${response.status}, trying v1 fallback...`);
-
-        // v1 uses singular 'type' param (not array), and only supports op/ed
-        const v1Url = `https://api.aniskip.com/v1/skip-times/${malId}/${episodeNumber}?type=op&type=ed`;
-        console.log('Fetching skip times from v1:', v1Url);
-
-        response = await fetch(v1Url, {
-          headers: { 'Accept': 'application/json' },
-        });
-
-        if (response.status === 404 || !response.ok) {
-          console.log(`No skip times found (v1 returned ${response.status})`);
-          setSkipTimes([]);
-          return [];
-        }
-      }
-
       if (!response.ok) {
-        throw new Error(`Aniskip API error: ${response.status}`);
+        throw new Error(`Aniskip proxy error: ${response.status}`);
       }
 
       const data: AniskipResponse = await response.json();

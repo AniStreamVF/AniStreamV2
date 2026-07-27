@@ -527,6 +527,21 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // Aniskip proxy – clean fetch (no Sibnet cookies) to api.aniskip.com
+    if (path.startsWith('/aniskip')) {
+      const malId = url.searchParams.get('malId');
+      const ep = url.searchParams.get('ep');
+      if (!malId || !ep) { write({error:'Paramètres malId et ep requis'},400); return; }
+      const length = url.searchParams.get('length') || '1440';
+      const apiUrl = `https://api.aniskip.com/v2/skip-times/${malId}/${ep}?types[]=op&types[]=ed&types[]=recap&episodeLength=${length}`;
+      try {
+        const r = await fetch(apiUrl, { headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(10000) });
+        const data = await r.json().catch(() => null);
+        write(data || {found:false,results:[]});
+      } catch(e) { write({found:false,results:[],error:e.message}); }
+      return;
+    }
+
     // Streaming routes must be checked BEFORE /anime/ catch-all
     if (path.startsWith('/servers/')) write(await fetchEpisodeServers(decodeURIComponent(path.slice(9))));
     else if (path.startsWith('/stream')) write(await fetchEpisodeStream(url.searchParams.get('id')||'', url.searchParams.get('server')||'', url.searchParams.get('type')||''));
