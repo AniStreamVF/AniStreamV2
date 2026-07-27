@@ -456,7 +456,10 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://localhost:${PORT}`);
     let path = url.pathname;
 
+    // Strip API version prefix(es) so the same bridge works with or without a reverse proxy
     if (path.startsWith('/api/v2/hianime')) path = path.replace('/api/v2/hianime','') || '/';
+    if (path.startsWith('/api/v2/anime')) path = path.replace('/api/v2/anime','') || '/';
+    if (path.startsWith('/api/v2/manga')) path = path.replace('/api/v2/manga','') || '/';
 
     // Page proxy – serves third-party HTML pages on the same origin (avoids cross-origin iframe issues)
     if (path.startsWith('/proxy/page')) {
