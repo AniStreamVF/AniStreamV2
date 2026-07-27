@@ -1,0 +1,6 @@
+node_modules
+dist_electron
+android
+.git
+.github
+save

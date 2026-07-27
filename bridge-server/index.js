@@ -444,6 +444,7 @@ async function proxyVideo(req, res, url, referer, userAgent) {
 }
 
 const server = createServer(async (req, res) => {
+  console.log(`[Bridge] ${req.method} ${req.url}`);
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Access-Control-Allow-Headers','*');
   res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');
