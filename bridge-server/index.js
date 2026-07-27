@@ -363,54 +363,10 @@ async function fetchEpisodeStream(episodeId) {
   if (!ep || !ep.embedUrl) {
     return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
   }
-  // Fetch the Sibnet shell page to extract the actual MP4 video URL
-  console.log('[Bridge] Récupération de la page Sibnet :', ep.embedUrl);
-  try {
-    let html = await fetchPageText(ep.embedUrl);
-    let videoUrl = null;
-    if (html && html.length > 200) {
-      videoUrl = extractVideoUrl(html);
-    }
-    // If first attempt failed, try again with mobile UA and cookies
-    if (!videoUrl) {
-      console.log('[Bridge] Première tentative échouée, nouvelle tentative avec en-têtes différents...');
-      html = await fetchPageText(ep.embedUrl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', referer: 'https://sibnet.ru/' });
-      if (html && html.length > 200) {
-        videoUrl = extractVideoUrl(html);
-      }
-    }
-    if (videoUrl) {
-      const fullUrl = resolveUrl(videoUrl, ep.embedUrl);
-      console.log('[Bridge] URL vidéo extraite :', fullUrl);
-      const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-      const proxiedLink = `${bridgeOrigin}/proxy/video?url=${encodeURIComponent(fullUrl)}&referer=${encodeURIComponent(ep.embedUrl)}`;
-      return {
-        streamingLink: [{
-          link: proxiedLink,
-          type: fullUrl.includes('.m3u8') ? 'hls' : 'mp4',
-          isEmbed: false,
-          server: 'Sibnet',
-          langCode: 'sub-vf'
-        }],
-        referer: ep.embedUrl,
-        tracks: [],
-        anilistID: null,
-        malID: null,
-        intro: null,
-        outro: null,
-      };
-    }
-    console.log('[Bridge] Aucune URL vidéo trouvée dans le HTML (longueur=' + (html ? html.length : 0) + ')');
-    if (html) {
-      console.log('[Bridge] Début du HTML reçu :\n' + html.slice(0, 2000));
-    }
-  } catch (e) {
-    console.error('[Bridge] Échec de l\'extraction vidéo depuis Sibnet :', e.message);
-  }
-  // Fallback: proxy the Sibnet shell page through the bridge
-  const fallbackOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-  const proxiedUrl = `${fallbackOrigin}/proxy/page?url=${encodeURIComponent(ep.embedUrl)}`;
-  console.log('[Bridge] Utilisation du proxy de page :', proxiedUrl);
+  // Proxy the Sibnet shell page through the bridge (handles auth, cookies, JS player)
+  const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  const proxiedUrl = `${bridgeOrigin}/proxy/page?url=${encodeURIComponent(ep.embedUrl)}`;
+  console.log('[Bridge] Embed Sibnet shell via proxy :', proxiedUrl);
   return {
     streamingLink: [{
       link: proxiedUrl,
@@ -432,7 +388,13 @@ async function proxyPage(req, res, url) {
   console.log('[Bridge] Proxy de la page :', url);
   try {
     const r = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://sibnet.ru/',
+        'Cookie': 'sibnet_uid=1; sibnet_hash=1',
+      },
       signal: AbortSignal.timeout(15000)
     });
     if (!r.ok) { res.writeHead(502); res.end('Erreur proxy : amont ' + r.status); return; }
@@ -440,6 +402,12 @@ async function proxyPage(req, res, url) {
     // Inject base tag so relative resources resolve against the original host
     const baseUrl = url.split('/').slice(0,3).join('/');
     html = html.replace('<head>', `<head><base href="${baseUrl}/">`);
+    // Neutralize frame-busting JavaScript
+    html = html.replace(/if\s*\(\s*top\s*(!==|!=)\s*self\s*\)/gi, 'if (false)');
+    html = html.replace(/if\s*\(\s*self\s*(!==|!=)\s*top\s*\)/gi, 'if (false)');
+    html = html.replace(/window\.top\s*(!==|!=)\s*window\.self/gi, 'false');
+    // Inject frame-busting prevention
+    html = html.replace('</head>', '<script>window.top=window;window.self=window;try{Object.defineProperty(window,"top",{get:function(){return window}})}catch(e){}</script></head>');
     res.writeHead(200, {
       'Content-Type': 'text/html; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
