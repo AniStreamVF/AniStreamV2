@@ -1,0 +1,491 @@
+import { createServer } from 'http';
+
+const PORT = process.env.PORT || 4567;
+const ANILIST_API = 'https://graphql.anilist.co';
+const CACHE = new Map();
+const CACHE_TTL = 5 * 60 * 1000;
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fxqrmcinehnuwmkvogcl.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cXJtY2luZWhudXdta3ZvZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTEzMzAsImV4cCI6MjEwMDA2NzMzMH0.JEnZl17WIpPL42fcMRnOx25HRu7zbaUkPilN9PSFhUM';
+
+const Q = {
+  trending: `query($p:Int,$n:Int){Page(page:$p,perPage:$n){media(sort:TRENDING_DESC,type:ANIME){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
+  popular: `query($p:Int,$n:Int){Page(page:$p,perPage:$n){media(sort:POPULARITY_DESC,type:ANIME){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
+  seasonal: `query($p:Int,$n:Int,$s:MediaSeason,$y:Int){Page(page:$p,perPage:$n){media(season:$s,seasonYear:$y,type:ANIME,sort:POPULARITY_DESC){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
+  upcoming: `query($p:Int,$n:Int){Page(page:$p,perPage:$n){media(status:NOT_YET_RELEASED,type:ANIME,sort:POPULARITY_DESC){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
+  search: `query($p:Int,$n:Int,$q:String){Page(page:$p,perPage:$n){pageInfo{total currentPage lastPage hasNextPage}media(search:$q,type:ANIME){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
+  anime: `query($id:Int){Media(id:$id,type:ANIME){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}startDate{year month day}endDate{year month day}trailer{id site thumbnail}recommendations(sort:RATING_DESC,perPage:10){nodes{mediaRecommendation{id idMal title{romaji english native userPreferred}coverImage{large}type}}}}}`,
+  genre: `query($p:Int,$n:Int,$g:String){Page(page:$p,perPage:$n){pageInfo{total currentPage lastPage hasNextPage}media(genre:$g,type:ANIME,sort:POPULARITY_DESC){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
+};
+
+function slug(id) { return `anilist-${id}`; }
+function title(t) { return t?.userPreferred || t?.english || t?.romaji || t?.native || 'Unknown'; }
+function jp(t) { return t?.native || t?.romaji || title(t); }
+function status(s) { return ({RELEASING:'Ongoing',FINISHED:'Completed',NOT_YET_RELEASED:'Not yet aired',CANCELLED:'Cancelled',HIATUS:'Hiatus'})[s]||s; }
+function type(f) { return ({TV:'TV',MOVIE:'Movie',TV_SHORT:'TV Short',OVA:'OVA',ONA:'ONA',SPECIAL:'Special'})[f]||f||'TV'; }
+function dur(f,d) { return d?d+'m':f==='MOVIE'?'1 hr':'24m'; }
+function season() { const m=new Date().getMonth(); return m<=2?'WINTER':m<=5?'SPRING':m<=8?'SUMMER':'FALL'; }
+function toSlug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+
+async function gql(query, vars) {
+  const key = JSON.stringify({query,vars});
+  const c = CACHE.get(key);
+  if (c && Date.now() < c.expires) return c.data;
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const r = await fetch(ANILIST_API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query,variables:vars}) });
+      if (r.status === 429) {
+        if (attempt < maxAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw new Error('AniList rate limit exceeded');
+      }
+      if (!r.ok) { const t=await r.text(); throw new Error(`AniList ${r.status}: ${t.slice(0,200)}`); }
+      const j = await r.json();
+      if (j.errors) throw new Error(j.errors[0]?.message || 'AniList error');
+      CACHE.set(key, { data:j.data, expires:Date.now()+CACHE_TTL });
+      return j.data;
+    } catch(e) {
+      if (attempt >= maxAttempts) throw e;
+      const delay = Math.min(500 * Math.pow(2, attempt), 5000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+async function supabaseFetch(path) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Connection': 'close' },
+      signal: controller.signal,
+    });
+    if (!r.ok) return null;
+    return r.json();
+  } catch { return null; }
+  finally { clearTimeout(timeout); }
+}
+
+function toSpot(m,i) { return { id:slug(m.id), name:title(m.title), jname:jp(m.title), poster:m.coverImage?.extraLarge||m.coverImage?.large||'', banner:m.bannerImage||'', description:(m.description||'').replace(/<[^>]*>/g,''), rank:i+1, otherInfo:[type(m.format),dur(m.format,m.duration),m.averageScore?m.averageScore+'%':'',m.seasonYear?m.season+' '+m.seasonYear:''].filter(Boolean), episodes:{sub:m.episodes||0,dub:m.episodes?Math.min(m.episodes,12):0} }; }
+function toTrend(m,i) { return { id:slug(m.id), name:title(m.title), poster:m.coverImage?.large||'', rank:i+1 }; }
+function toTop(m,i) { return { id:slug(m.id), name:title(m.title), poster:m.coverImage?.large||'', rank:i+1, episodes:{sub:m.episodes||0,dub:m.episodes?Math.min(m.episodes,12):0}, malId:m.idMal, anilistId:m.id }; }
+function toCard(m) { return { id:slug(m.id), name:title(m.title), jname:jp(m.title), poster:m.coverImage?.large||'', type:type(m.format), duration:dur(m.format,m.duration), rating:m.averageScore?String(m.averageScore):'', episodes:{sub:m.episodes||0,dub:m.episodes?Math.min(m.episodes,12):0}, malId:m.idMal, anilistId:m.id }; }
+
+async function home() {
+  const [t,p,s,u] = await Promise.all([
+    gql(Q.trending,{p:1,n:20}), gql(Q.popular,{p:1,n:20}),
+    gql(Q.seasonal,{p:1,n:20,s:season(),y:new Date().getFullYear()}),
+    gql(Q.upcoming,{p:1,n:20})
+  ]);
+  const tr=t.Page?.media||[], po=p.Page?.media||[], se=s.Page?.media||[], up=u.Page?.media||[];
+  return { genres:['Action','Adventure','Comedy','Drama','Fantasy','Horror','Mecha','Music','Mystery','Psychological','Romance','Sci-Fi','Slice of Life','Sports','Supernatural','Thriller'], spotlightAnimes:up.slice(0,10).map(toSpot), trendingAnimes:tr.slice(0,20).map(toTrend), top10Animes:{today:tr.slice(0,10).map(toTop),week:tr.slice(0,10).map(toTop),month:po.slice(0,10).map(toTop)}, topAiringAnimes:se.slice(0,20).map(toCard), topUpcomingAnimes:up.slice(0,20).map(toCard), latestEpisodeAnimes:tr.slice(0,20).map(toCard), mostPopularAnimes:po.slice(0,20).map(toCard), mostFavoriteAnimes:po.slice(0,20).map(toCard), latestCompletedAnimes:[] };
+}
+
+async function search(u) {
+  const q = u.searchParams.get('q')||'', p = parseInt(u.searchParams.get('page')||'1');
+  if (!q) return { animes:[], mostPopularAnimes:[], currentPage:1, totalPages:0, hasNextPage:false, searchQuery:'' };
+  const d = await gql(Q.search,{p,n:20,q}), pi = d.Page?.pageInfo||{}, pd = await gql(Q.popular,{p:1,n:5});
+  return { animes:(d.Page?.media||[]).map(toCard), mostPopularAnimes:(pd.Page?.media||[]).slice(0,5).map(toCard), currentPage:pi.currentPage||1, totalPages:pi.lastPage||1, hasNextPage:pi.hasNextPage||false, searchQuery:q };
+}
+
+async function anime(idStr) {
+  let id = parseInt(idStr);
+  if (isNaN(id)) { const m=idStr.match(/^anilist-(\d+)$/); if(m) id=parseInt(m[1]); }
+  if (isNaN(id)) return null;
+  const d = await gql(Q.anime,{id}), m = d.Media;
+  if (!m) return null;
+  const rec = (m.recommendations?.nodes||[]).filter(n=>n?.mediaRecommendation).map(n=>n.mediaRecommendation);
+  return { anime:{ info:{ id:slug(m.id), name:title(m.title), poster:m.coverImage?.extraLarge||m.coverImage?.large||'', description:(m.description||'').replace(/<[^>]*>/g,''), stats:{ rating:m.averageScore?m.averageScore+'%':'', quality:'HD', episodes:{sub:m.episodes||0,dub:m.episodes?Math.min(m.episodes,12):0}, type:type(m.format), duration:dur(m.format,m.duration) }, malId:m.idMal, anilistId:m.id, promotionalVideos:m.trailer?.id?[{title:'Trailer',source:'https://www.youtube.com/watch?v='+m.trailer.id,thumbnail:m.trailer.thumbnail||''}]:[], characterVoiceActor:[] }, moreInfo:{ aired:m.startDate?.year?String(m.startDate.year):'', genres:m.genres||[], status:status(m.status), studios:(m.studios?.nodes||[]).map(s=>s.name).join(', ')||'Unknown', duration:dur(m.format,m.duration), malId:m.idMal, anilistId:m.id } }, recommendedAnimes:rec.map(toCard), relatedAnimes:[] };
+}
+
+async function genre(u, slug) {
+  const p = parseInt(u.searchParams.get('page')||'1'), g = slug.charAt(0).toUpperCase()+slug.slice(1).toLowerCase();
+  const d = await gql(Q.genre,{p,n:20,g}), pi = d.Page?.pageInfo||{};
+  return { genreName:g, animes:(d.Page?.media||[]).map(toCard), currentPage:pi.currentPage||1, totalPages:pi.lastPage||1, hasNextPage:pi.hasNextPage||false };
+}
+
+async function fetchEpisodes(animeId) {
+  let id = parseInt(animeId);
+  if (isNaN(id)) { const m=animeId.match(/^anilist-(\d+)$/); if(m) id=parseInt(m[1]); }
+  if (isNaN(id)) return {totalEpisodes:0,episodes:[]};
+
+  const d = await gql(Q.anime,{id}), media = d?.Media;
+  if (!media) return {totalEpisodes:0,episodes:[]};
+
+  // Try all available titles (english, romaji, userPreferred) for matching
+  const titles = [
+    media.title?.english,
+    media.title?.romaji,
+    media.title?.userPreferred,
+    media.title?.native,
+  ].filter(Boolean);
+
+  let rows = null;
+  for (const t of titles) {
+    const slugBase = toSlug(t);
+    if (!slugBase) continue;
+    rows = await supabaseFetch(`animes?select=slug,episodes&slug=like.${encodeURIComponent(slugBase + '%')}`);
+    if (rows && rows.length > 0) break;
+  }
+
+  if (!rows || rows.length === 0) return {totalEpisodes:0,episodes:[]};
+
+  const episodes = [];
+  for (const row of rows) {
+    const epList = row.episodes || [];
+    for (const ep of epList) {
+      const seasonNum = ep.season || 1;
+      episodes.push({
+        number: ep.number,
+        title: ep.title || `Épisode ${ep.number}`,
+        episodeId: `${row.slug}-s${seasonNum}-e${ep.number}`,
+        isFiller: false,
+        season: seasonNum,
+        lang: ep.lang || 'vf',
+        sources: ep.sources || [],
+        embedUrl: ep.embedUrl || '',
+      });
+    }
+  }
+
+  episodes.sort((a,b) => a.season - b.season || a.number - b.number);
+
+  return {
+    totalEpisodes: episodes.length,
+    episodes: episodes.map(e => ({ number:e.number, title:e.title, episodeId:e.episodeId, isFiller:e.isFiller })),
+    _raw: episodes,
+  };
+}
+
+function parseEpisodeId(episodeId) {
+  // Format: {slug}-s{season}-e{number}  OR  {slug}?ep={something}
+  const m = episodeId.match(/^(.+)-s(\d+)-e(\d+)$/);
+  if (m) return { slug: m[1], season: parseInt(m[2]), number: parseInt(m[3]) };
+  const m2 = episodeId.match(/^(.+?)(\?|$)/);
+  if (m2) return { slug: m2[1], season: 1, number: 0 };
+  return null;
+}
+
+async function findEpisode(episodeId) {
+  const parsed = parseEpisodeId(episodeId);
+  if (!parsed) return null;
+  const { slug, season, number } = parsed;
+  const rows = await supabaseFetch(`animes?select=slug,episodes&slug=eq.${encodeURIComponent(slug)}`);
+  if (!rows || rows.length === 0) return null;
+  for (const row of rows) {
+    const epList = row.episodes || [];
+    const ep = epList.find(e => e.number === number && (e.season || 1) === season);
+    if (ep) return { ...ep, slug: row.slug };
+  }
+  return null;
+}
+
+async function fetchEpisodeServers(episodeId) {
+  const parsed = parseEpisodeId(episodeId);
+  if (!parsed) return { episodeId, episodeNo: 0, sub: [], dub: [], raw: [] };
+  const ep = await findEpisode(episodeId);
+  if (!ep || !ep.embedUrl) return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
+  return {
+    episodeId,
+    episodeNo: parsed.number,
+    sub: [{ serverId: 1, serverName: 'Sibnet', type: 'sub' }],
+    dub: [],
+    raw: [],
+  };
+}
+
+async function fetchPageText(url, options = {}) {
+  const agents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+  ];
+  const referers = ['https://sibnet.ru/', 'https://video.sibnet.ru/', 'https://sibnet.ru/'];
+  // Try up to 3 times with different User-Agent and longer timeout
+  for (let i = 0; i < 3; i++) {
+    try {
+      const ua = options.ua || agents[i % agents.length];
+      const ref = options.referer || referers[i % referers.length];
+      const headers = {
+        'User-Agent': ua,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': ref,
+      };
+      if (i > 0) headers['Cookie'] = 'sibnet_uid=1; sibnet_hash=1';
+      const r = await fetch(url, {
+        headers,
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!r.ok) continue;
+      const text = await r.text();
+      if (text && text.length > 50) return text;
+    } catch (e) {
+      if (i === 2) console.error('[Bridge] Échec de récupération de la page :', e.message);
+    }
+  }
+  return null;
+}
+
+function extractVideoUrl(html) {
+  let m;
+
+  // Pattern 1 (Sibnet-specific): player.src([{src: "/v/hash/id.mp4"}]) with relaxed matching
+  m = html.match(/player\.src\s*\(\s*\[.*?src\s*:\s*["']([^"']+)["']/is);
+  if (m) return m[1];
+
+  // Pattern 2: player.src([{src:"/v/hash/id.mp4"}]) without newlines - more flexible
+  m = html.match(/player\s*\.\s*src\s*\([\s\S]*?src\s*[:=]\s*["']([^"']+)["']/i);
+  if (m) return m[1];
+
+  // Pattern 3: src: in any JSON-like object (generalized)
+  m = html.match(/(?:src|video|file|url)\s*[:=]\s*["']([^"']*\.(?:mp4|m3u8)[^"']*)["']/i);
+  if (m) return m[1];
+
+  // Pattern 4: <source src="...mp4" type="video/mp4"> or data-src
+  m = html.match(/<source\s+[^>]*(?:src|data-src)\s*=\s*"([^"]+\.(?:mp4|m3u8)[^"]*)"[^>]*>/i);
+  if (m) return m[1];
+  m = html.match(/<source\s+[^>]*src\s*=\s*"([^"]+\.mp4[^"]*)"[^>]*>/i);
+  if (m) return m[1];
+
+  // Pattern 5: <video ... src="...mp4" or data-video
+  m = html.match(/<video\s+[^>]*(?:src|data-video)\s*=\s*"([^"]+\.(?:mp4|m3u8)[^"]*)"[^>]*>/i);
+  if (m) return m[1];
+  m = html.match(/<video\s+[^>]*src\s*=\s*"([^"]+\.mp4[^"]*)"[^>]*>/i);
+  if (m) return m[1];
+  m = html.match(/<video\s+[^>]*src\s*=\s*"([^"]+\.m3u8[^"]*)"[^>]*>/i);
+  if (m) return m[1];
+
+  // Pattern 6: file: "..." or file: '...' in JavaScript (jwplayer, videojs, etc.)
+  m = html.match(/["']file["']\s*:\s*["']([^"']+)["']/i);
+  if (m) return m[1];
+
+  // Pattern 7: src: "..." or src: '...' in JavaScript (hls.js, plyr, etc.)
+  m = html.match(/["']src["']\s*:\s*["']([^"']+)["']/i);
+  if (m) return m[1];
+
+  // Pattern 8: JS variable assignments like var videoUrl = '...' or let src = "..."
+  m = html.match(/(?:var|let|const)\s+(?:videoUrl|video_url|src|videoSrc|fileUrl|mp4|url)\s*[:=]\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']/i);
+  if (m) return m[1];
+  m = html.match(/(?:var|let|const)\s+\w+\s*[:=]\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']/i);
+  if (m) return m[1];
+
+  // Pattern 9: video_url: '...' or video_url: "..." (common in PHP/JSON configs)
+  m = html.match(/(?:video_url|videoUrl|video_src|mp4_url|src_url)\s*[:=]\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']/i);
+  if (m) return m[1];
+
+  // Pattern 10: data-src or data-video attribute (general)
+  m = html.match(/(?:data-src|data-video|data-url)\s*=\s*"([^"]+\.(?:mp4|m3u8)[^"]*)"/i);
+  if (m) return m[1];
+
+  // Pattern 11: direct .mp4 URL anywhere in the page
+  m = html.match(/https?:\/\/[^"'\s<>]+\.mp4[^"'\s<>]*/i);
+  if (m) return m[0];
+
+  // Pattern 12: direct .m3u8 URL anywhere in the page
+  m = html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i);
+  if (m) return m[0];
+
+  // Pattern 13: addVariable("file","...") or Flash embed
+  m = html.match(/addVariable\s*\(\s*["']file["']\s*,\s*["']([^"']+)["']/i);
+  if (m) return m[1];
+
+  // Pattern 14: data-src attribute (legacy)
+  m = html.match(/data-src\s*=\s*"([^"]+\.(mp4|m3u8)[^"]*)"/i);
+  if (m) return m[1];
+
+  return null;
+}
+
+function resolveUrl(url, baseUrl) {
+  if (!url) return url;
+  // Already absolute
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  // Protocol-relative
+  if (url.startsWith('//')) return 'https:' + url;
+  // Absolute path relative to origin
+  if (url.startsWith('/')) {
+    const origin = new URL(baseUrl).origin;
+    return origin + url;
+  }
+  // Relative path - join with base directory
+  const base = baseUrl.replace(/\/[^/]*$/, '/');
+  return base + url;
+}
+
+async function fetchEpisodeStream(episodeId) {
+  const ep = await findEpisode(episodeId);
+  if (!ep || !ep.embedUrl) {
+    return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
+  }
+  // Fetch the Sibnet shell page to extract the actual MP4 video URL
+  console.log('[Bridge] Récupération de la page Sibnet :', ep.embedUrl);
+  try {
+    let html = await fetchPageText(ep.embedUrl);
+    let videoUrl = null;
+    if (html && html.length > 200) {
+      videoUrl = extractVideoUrl(html);
+    }
+    // If first attempt failed, try again with mobile UA and cookies
+    if (!videoUrl) {
+      console.log('[Bridge] Première tentative échouée, nouvelle tentative avec en-têtes différents...');
+      html = await fetchPageText(ep.embedUrl, { ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', referer: 'https://sibnet.ru/' });
+      if (html && html.length > 200) {
+        videoUrl = extractVideoUrl(html);
+      }
+    }
+    if (videoUrl) {
+      const fullUrl = resolveUrl(videoUrl, ep.embedUrl);
+      console.log('[Bridge] URL vidéo extraite :', fullUrl);
+      return {
+        streamingLink: [{
+          link: fullUrl,
+          type: fullUrl.includes('.m3u8') ? 'hls' : 'mp4',
+          isEmbed: false,
+          server: 'Sibnet',
+          langCode: 'sub-vf'
+        }],
+        referer: ep.embedUrl,
+        tracks: [],
+        anilistID: null,
+        malID: null,
+        intro: null,
+        outro: null,
+      };
+    }
+    console.log('[Bridge] Aucune URL vidéo trouvée dans le HTML (longueur=' + (html ? html.length : 0) + ')');
+    if (html) {
+      console.log('[Bridge] Début du HTML reçu :\n' + html.slice(0, 2000));
+    }
+  } catch (e) {
+    console.error('[Bridge] Échec de l\'extraction vidéo depuis Sibnet :', e.message);
+  }
+  // Fallback: proxy the Sibnet shell page through the bridge
+  const proxiedUrl = `/proxy/page?url=${encodeURIComponent(ep.embedUrl)}`;
+  console.log('[Bridge] Utilisation du proxy de page :', proxiedUrl);
+  return {
+    streamingLink: [{
+      link: proxiedUrl,
+      type: 'mp4',
+      isEmbed: true,
+      server: 'Sibnet',
+      langCode: 'sub-vf'
+    }],
+    referer: ep.embedUrl,
+    tracks: [],
+    anilistID: null,
+    malID: null,
+    intro: null,
+    outro: null,
+  };
+}
+
+async function proxyPage(req, res, url) {
+  console.log('[Bridge] Proxy de la page :', url);
+  try {
+    const r = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!r.ok) { res.writeHead(502); res.end('Erreur proxy : amont ' + r.status); return; }
+    let html = await r.text();
+    // Inject base tag so relative resources resolve against the original host
+    const baseUrl = url.split('/').slice(0,3).join('/');
+    html = html.replace('<head>', `<head><base href="${baseUrl}/">`);
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache',
+    });
+    res.end(html);
+  } catch(e) {
+    res.writeHead(502);
+    res.end('Erreur proxy : ' + e.message);
+  }
+}
+
+async function proxyVideo(req, res, url, referer, userAgent) {
+  console.log('[Bridge] Proxy de la vidéo :', url);
+  try {
+    const headers = {
+      'User-Agent': userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept': 'video/mp4,video/webm,video/*,*/*;q=0.8',
+    };
+    if (referer) headers['Referer'] = referer;
+    // Pass through Range header for seeking support
+    if (req.headers['range']) headers['Range'] = req.headers['range'];
+    const r = await fetch(url, { headers, signal: AbortSignal.timeout(120000) });
+    if (!r.ok && r.status !== 206) { res.writeHead(502); res.end(JSON.stringify({error:`Amont ${r.status}`})); return; }
+    // Forward upstream headers needed by the video player
+    const contentType = r.headers.get('content-type') || 'video/mp4';
+    const contentRange = r.headers.get('content-range');
+    const contentLength = r.headers.get('content-length');
+    const responseHeaders = {
+      'Content-Type': contentType,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'Content-Range, Content-Length, Accept-Ranges',
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=3600',
+    };
+    if (contentRange) responseHeaders['Content-Range'] = contentRange;
+    if (contentLength) responseHeaders['Content-Length'] = contentLength;
+    res.writeHead(r.status, responseHeaders);
+    // Stream directly without buffering
+    for await (const chunk of r.body) res.write(chunk);
+    res.end();
+  } catch(e) {
+    res.writeHead(502);
+    res.end(JSON.stringify({error: e.message}));
+  }
+}
+
+const server = createServer(async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin','*');
+  res.setHeader('Access-Control-Allow-Headers','*');
+  res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');
+  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+  const write = (data, status=200) => { res.writeHead(status, {'Content-Type':'application/json'}); res.end(JSON.stringify(data)); };
+  const writeErr = (msg, s=500) => { console.error(msg); write({error:String(msg)}, s); };
+
+  try {
+    const url = new URL(req.url, `http://localhost:${PORT}`);
+    let path = url.pathname;
+
+    if (path.startsWith('/api/v2/hianime')) path = path.replace('/api/v2/hianime','') || '/';
+
+    // Page proxy – serves third-party HTML pages on the same origin (avoids cross-origin iframe issues)
+    if (path.startsWith('/proxy/page')) {
+      const pageUrl = url.searchParams.get('url');
+      if (!pageUrl) { write({error:'Paramètre url manquant'},400); return; }
+      await proxyPage(req, res, pageUrl);
+      return;
+    }
+
+    // Video proxy – streams content from third-party CDNs with proper headers, avoiding CORS
+    if (path.startsWith('/proxy/video')) {
+      const videoUrl = url.searchParams.get('url');
+      if (!videoUrl) { write({error:'Paramètre url manquant'},400); return; }
+      await proxyVideo(req, res, videoUrl, url.searchParams.get('referer'), url.searchParams.get('userAgent'));
+      return;
+    }
+
+    // Streaming routes must be checked BEFORE /anime/ catch-all
+    if (path.startsWith('/servers/')) write(await fetchEpisodeServers(decodeURIComponent(path.slice(9))));
+    else if (path.startsWith('/stream')) write(await fetchEpisodeStream(url.searchParams.get('id')||''));
+    else if (path==='/'||path==='/home') write(await home());
+    else if (path.startsWith('/search')) write(await search(url));
+    else if (path.startsWith('/genre/')) write(await genre(url, path.slice(7)));
+    else if (path.startsWith('/producer/')) write({producerName:path.slice(10),animes:[],top10Animes:{today:[],week:[],month:[]},topAiringAnimes:[],currentPage:1,totalPages:0,hasNextPage:false});
+    else if (path.match(/^\/anime\/[^/]+\/episodes$/)) write(await fetchEpisodes(path.split('/')[2]));
+    else if (path.match(/^\/anime\/[^/]+\/next-episode-schedule$/)) write({episode:null});
+    else if (path.startsWith('/anime/')) { const d=await anime(path.slice(7)); if(d) write(d); else write({error:'Non trouvé'},404); }
+    else write({error:'Non trouvé'},404);
+  } catch(e) { writeErr(e.message); }
+});
+
+server.listen(PORT, () => console.log(`Bridge démarré sur http://localhost:${PORT}`));

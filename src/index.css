@@ -1,0 +1,527 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 6%;
+    --foreground: 0 0% 93%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 93%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 80%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 0 0% 85%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 0% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 60%;
+
+    --radius: 0.5rem;
+
+    /* Custom colors */
+    --glass: 0 0% 12%;
+    --glass-border: 0 0% 100%;
+    --glow-primary: 0 0% 100%;
+    --glow-secondary: 0 0% 70%;
+    --surface: 0 0% 8%;
+    --surface-hover: 0 0% 14%;
+    --amber: 0 0% 70%;
+    --amber-glow: 0 0% 80%;
+    --orange: 0 0% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  ::selection {
+    @apply bg-white/20 text-white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Safe Area Support for Mobile Devices */
+  html {
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+  }
+}
+
+/* Safe Area Utility Classes */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+/* Accessibility - Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom Accessibility Classes for Mobile Settings */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Fast Animation Mode - Snappy UI */
+html.fast-animations * {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+}
+
+html.fast-animations *::before,
+html.fast-animations *::after {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+}
+
+/* Quality Animation Mode - Smooth 60fps */
+html.quality-animations * {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: transform, opacity;
+}
+
+/* Mobile Performance Optimizations */
+@media (max-width: 768px) {
+  /* Enable hardware acceleration for smoother scrolling */
+  .scroll-container,
+  [data-scroll],
+  main {
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: scroll-position;
+  }
+  
+  /* Optimize major containers with content-visibility */
+  main, 
+  .hero-section,
+  .trending-grid,
+  .anime-grid,
+  .episode-list {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px; /* Placeholder size for layout stability */
+  }
+
+  /* Optimize images for mobile */
+  img {
+    content-visibility: auto;
+    contain-intrinsic-size: 200px 300px;
+    image-rendering: -webkit-optimize-contrast;
+  }
+  
+  /* Reduce repaints on scroll */
+  .glass-panel {
+    contain: layout paint;
+    transform: translateZ(0); /* Force GUI layer */
+  }
+}
+
+/* Native App Specific Optimizations */
+.capacitor-native {
+  /* Disable text selection for app-like feel */
+  -webkit-user-select: none;
+  user-select: none;
+  
+  /* Disable tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Prevent overscroll */
+  overscroll-behavior: none;
+}
+
+.capacitor-native input,
+.capacitor-native textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+/* Smooth skeleton loading */
+@keyframes mobile-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.mobile-skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: mobile-shimmer 1.5s ease-in-out infinite;
+}
+
+html.large-text {
+  font-size: 18px !important;
+}
+
+html.large-text body {
+  font-size: 1rem;
+}
+
+html.high-contrast {
+  --border: 240 10% 50%;
+  --muted-foreground: 240 5% 85%;
+}
+
+html.high-contrast .glass-panel {
+  border-width: 2px;
+}
+
+html.high-contrast button,
+html.high-contrast a {
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 240 10% 40%;
+    --muted-foreground: 240 5% 80%;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply relative overflow-hidden rounded-[var(--radius)] border border-border/30 bg-card/50 backdrop-blur-2xl;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .glass-panel-hover {
+    @apply transition-all duration-500;
+  }
+
+  .glass-panel-hover:hover {
+    @apply border-border/50 bg-card/60 -translate-y-1;
+  }
+
+  .nav-icon {
+    @apply p-3 rounded-2xl transition-all duration-300;
+  }
+
+  .nav-icon-active {
+    @apply bg-white text-black;
+  }
+
+  .nav-icon-inactive {
+    @apply text-muted-foreground hover:bg-muted hover:text-foreground;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(90deg,
+        hsl(var(--muted)) 0%,
+        hsl(var(--muted-foreground) / 0.2) 50%,
+        hsl(var(--muted)) 100%);
+    background-size: 200% 100%;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ping-once {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.animate-ping-once { animation: ping-once 0.5s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+
+/* Smart TV Mode Styles */
+.smart-tv-mode button,
+.smart-tv-mode a,
+.smart-tv-mode [role="button"] {
+  min-height: 48px;
+  min-width: 48px;
+  font-size: 1.1em;
+}
+
+.smart-tv-mode .nav-icon { padding: 1rem; }
+.smart-tv-mode h1 { font-size: 2.5rem; }
+.smart-tv-mode h2 { font-size: 2rem; }
+.smart-tv-mode h3 { font-size: 1.5rem; }
+.smart-tv-mode p, .smart-tv-mode span { font-size: 1.1rem; }
+.smart-tv-mode *:focus {
+  outline: 3px solid hsl(var(--foreground));
+  outline-offset: 4px;
+}
+
+.smart-tv-mode button:focus,
+.smart-tv-mode a:focus,
+.smart-tv-mode [tabindex]:focus {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(255,255,255,0.3);
+}
+
+.smart-tv-mode .glass-panel { min-height: 200px; }
+.smart-tv-mode .mobile-nav { display: none; }
+.smart-tv-mode video::-webkit-media-controls {
+  transform: scale(1.3);
+  transform-origin: bottom center;
+}
+
+body.video-fullscreen .app-sidebar { display: none !important; }
+body.video-fullscreen { overflow: hidden; }
+
+/* Enhanced Video Player Styles */
+.video-player-modern {
+  --player-accent: #ffffff;
+  --player-bg: rgba(0, 0, 0, 0.85);
+}
+
+.video-controls-gradient {
+  background: linear-gradient(to top,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.7) 30%,
+      rgba(0, 0, 0, 0.3) 60%,
+      transparent 100%);
+}
+
+.video-progress-track {
+  height: 4px;
+  transition: height 0.2s ease;
+}
+.video-progress-track:hover { height: 8px; }
+
+.video-control-btn {
+  @apply p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-200;
+}
+
+.video-control-btn:hover { transform: scale(1.1); }
+.video-control-btn:active { transform: scale(0.95); }
+
+.skip-button-glow {
+  animation: skip-glow 2s ease-in-out infinite;
+}
+
+@keyframes skip-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+  50% { box-shadow: 0 0 40px rgba(255,255,255,0.5); }
+}
+
+.smart-tv-mode .video-control-btn {
+  min-width: 56px;
+  min-height: 56px;
+  padding: 1rem;
+}
+
+.smart-tv-mode .video-progress-track { height: 8px; }
+.smart-tv-mode .video-progress-track:hover { height: 12px; }
+
+/* Rank Name Animations - Grayscale */
+@keyframes rn-scroll   { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+@keyframes rn-scroll-f { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+@keyframes rn-pulse    { 0%,100%{opacity:1} 50%{opacity:0.65} }
+
+@keyframes rn-glow {
+  0%,100%{ filter: drop-shadow(0 0 4px rgba(255,255,255,0.3)) brightness(1); }
+  50%    { filter: drop-shadow(0 0 12px rgba(255,255,255,0.6)) brightness(1.3); }
+}
+
+.rn-gray  { color: #6b7280; font-weight: 500; }
+.rn-gray2 { color: #9ca3af; font-weight: 500; }
+
+.rn-nature {
+  color: #cccccc;
+  font-weight: 600;
+  animation: rn-pulse 2.5s ease-in-out infinite;
+  text-shadow: 0 0 6px rgba(255,255,255,0.3);
+}
+
+.rn-frost {
+  color: #e0e0e0;
+  font-weight: 700;
+  animation: rn-pulse 3s ease-in-out infinite;
+}
+
+.rn-spectral {
+  color: #d0d0d0;
+  font-weight: 700;
+  animation: rn-pulse 2.8s ease-in-out infinite;
+}
+
+.rn-electric {
+  color: #c0c0c0;
+  font-weight: 800;
+  animation: rn-pulse 1.5s ease-in-out infinite;
+}
+
+.rn-demon {
+  color: #b0b0b0;
+  font-weight: 800;
+  animation: rn-pulse 2s ease-in-out infinite;
+}
+
+.rn-sakura {
+  color: #e8e8e8;
+  font-weight: 800;
+  animation: rn-pulse 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+}
+
+.rn-fire {
+  color: #f0f0f0;
+  font-weight: 900;
+  animation: rn-pulse 1.2s ease-in-out infinite;
+}
+
+.rn-saiyan {
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  animation: rn-pulse 0.6s ease-in-out infinite;
+}
+
+.rn-onepunch {
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  animation: rn-pulse 1.2s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.6));
+}

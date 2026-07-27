@@ -1,0 +1,3 @@
+[submodule "AniStreamAPI"]
+	path = AniStreamAPI
+	url = https://github.com/Snozxyx/AniStreamAPI
