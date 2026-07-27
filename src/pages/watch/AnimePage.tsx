@@ -54,7 +54,7 @@ export default function AnimePage() {
 
   const contentAnimeId = resolvedAnimeId || routeAnimeId;
 
-  const { data: episodesData, isLoading: loadingEpisodes } = useEpisodes(
+  const { data: episodesData, isLoading: loadingEpisodes, error: episodesError } = useEpisodes(
     resolvedAnimeId || routeAnimeId
   );
   const { data: hiAnimeSeasons = [] } = useHiAnimeSeasons(
@@ -508,6 +508,13 @@ export default function AnimePage() {
                 {Array.from({ length: 12 }).map((_, i) => (
                   <Skeleton key={i} className="h-12 rounded-lg" />
                 ))}
+              </div>
+            ) : episodesError ? (
+              <div className="text-center py-8">
+                <p className="text-red-400 text-sm mb-2">Erreur épisodes</p>
+                <pre className="text-xs text-red-400/70 bg-black/20 rounded-lg p-3 max-h-32 overflow-auto inline-block text-left">
+                  {episodesError instanceof Error ? episodesError.message : String(episodesError)}
+                </pre>
               </div>
             ) : episodesData ? (
               <div className="grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 gap-2">
