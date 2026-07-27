@@ -124,15 +124,46 @@ async function fetchEpisodes(animeId) {
     media.title?.native,
   ].filter(Boolean);
 
+  console.log('[Bridge] FetchEpisodes titles:', titles);
+
   let rows = null;
   for (const t of titles) {
     const slugBase = toSlug(t);
     if (!slugBase) continue;
-    rows = await supabaseFetch(`animes?select=slug,episodes&slug=like.${encodeURIComponent(slugBase + '%')}`);
-    if (rows && rows.length > 0) break;
+    const supabaseUrl = `animes?select=slug,episodes&slug=like.${encodeURIComponent(slugBase + '%')}`;
+    console.log('[Bridge] Supabase query:', supabaseUrl);
+    rows = await supabaseFetch(supabaseUrl);
+    console.log('[Bridge] Supabase result:', rows ? `found ${rows.length} rows` : 'null');
+    if (rows && rows.length > 0) {
+      console.log('[Bridge] Matched slugs:', rows.map(r => r.slug));
+      break;
+    }
   }
 
-  if (!rows || rows.length === 0) return {totalEpisodes:0,episodes:[]};
+  if (!rows || rows.length === 0) {
+    console.log('[Bridge] No Supabase match, using placeholder episodes');
+    // Fallback: generate placeholder episodes from AniList data
+    const epCount = media.episodes || media.duration ? 12 : 12;
+    const placeholderEpisodes = [];
+    const slugBase = toSlug(media.title?.userPreferred || media.title?.english || media.title?.romaji || 'anime');
+    for (let i = 1; i <= epCount; i++) {
+      placeholderEpisodes.push({
+        number: i,
+        title: media.duration ? `Épisode ${i}` : `Épisode ${i}`,
+        episodeId: `${slugBase}-s1-e${i}`,
+        isFiller: false,
+        season: 1,
+        lang: 'vf',
+        sources: [],
+        embedUrl: '',
+      });
+    }
+    return {
+      totalEpisodes: placeholderEpisodes.length,
+      episodes: placeholderEpisodes.map(e => ({ number:e.number, title:e.title, episodeId:e.episodeId, isFiller:e.isFiller })),
+      _raw: placeholderEpisodes,
+    };
+  }
 
   const episodes = [];
   for (const row of rows) {
