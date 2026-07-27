@@ -61,12 +61,19 @@ async function supabaseFetch(path) {
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Connection': 'close' },
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Connection': 'close', 'Accept': 'application/json' },
       signal: controller.signal,
     });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const body = await r.text().catch(() => '');
+      console.log(`[Bridge] Supabase error ${r.status}: ${body.slice(0,200)}`);
+      return null;
+    }
     return r.json();
-  } catch { return null; }
+  } catch(e) {
+    console.log(`[Bridge] Supabase fetch error: ${e.message}`);
+    return null;
+  }
   finally { clearTimeout(timeout); }
 }
 
