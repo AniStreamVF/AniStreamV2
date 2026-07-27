@@ -555,15 +555,15 @@ export function getProxiedVideoUrl(
     return buildAnimepaheProxyUrl(upstreamUrl, referer);
   }
 
-  // Route Sibnet (and similar CDN) URLs through the local bridge proxy to avoid CORS
-  // Use page origin so it works from any device on the network (Vite proxies /proxy → bridge)
-  const pageOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-  const proxyBase = pageOrigin || String(import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:4567');
+  // Route Sibnet (and similar CDN) URLs through the bridge proxy (Render).
+  // In dev, Vite proxies /proxy → localhost:4567. In prod, Vercel has no /proxy rewrite,
+  // so we must point directly at the bridge origin (VITE_BACKEND_ORIGIN = anistreamv2.onrender.com).
   if (/sibnet\.ru/i.test(upstreamUrl)) {
     const params = new URLSearchParams({ url: upstreamUrl, type: 'video' });
     if (referer) params.set('referer', referer);
     if (userAgent) params.set('userAgent', userAgent);
-    return `${proxyBase}/proxy/video?${params.toString()}`;
+    const bridgeOrigin = String(import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:4567');
+    return `${bridgeOrigin}/proxy/video?${params.toString()}`;
   }
 
   if (upstreamFromExistingProxy) {
