@@ -473,13 +473,19 @@ async function proxyVideo(req, res, url, referer, userAgent, cookie) {
     res.writeHead(r.status, responseHeaders);
     // Compatible body streaming (Node 18+ with native fetch)
     const reader = r.body.getReader();
-    (async () => {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) { res.end(); break; }
-        res.write(value);
+    const pump = async () => {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) { res.end(); break; }
+          res.write(value);
+        }
+      } catch(e) {
+        console.error('[Bridge] Stream error:', e.message);
+        if (!res.writableEnded) res.end();
       }
-    })();
+    };
+    pump();
   } catch(e) {
     res.writeHead(502);
     res.end(JSON.stringify({error: e.message}));
