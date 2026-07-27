@@ -194,10 +194,14 @@ const Index = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-lg">
           <h1 className="text-2xl font-bold mb-2">Échec du chargement</h1>
-          <p className="text-muted-foreground">Veuillez réessayer plus tard</p>
+          <p className="text-muted-foreground mb-4">Veuillez réessayer plus tard</p>
+          <pre className="text-xs text-left bg-black/20 rounded-lg p-4 overflow-auto max-h-60 text-red-400 border border-red-900/30">
+            {error instanceof Error ? error.message : String(error)}
+            {error instanceof Error && error.stack ? `\n\n${error.stack}` : ''}
+          </pre>
         </div>
       </div>
     );
