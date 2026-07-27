@@ -2306,7 +2306,7 @@ export function VideoPlayer({
 
         0,
 
-        Math.min(duration, currentTime + seconds)
+        Math.min(videoRef.current.duration || Infinity, videoRef.current.currentTime + seconds)
 
       );
 
