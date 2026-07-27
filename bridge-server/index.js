@@ -1,6 +1,6 @@
 import { createServer } from 'http';
 
-const PORT = process.env.PORT || 0000;
+const PORT = process.env.PORT || 0;
 const ANILIST_API = 'https://graphql.anilist.co';
 const CACHE = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
