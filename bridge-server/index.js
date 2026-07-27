@@ -5,8 +5,11 @@ const ANILIST_API = 'https://graphql.anilist.co';
 const CACHE = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fxqrmcinehnuwmkvogcl.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cXJtY2luZWhudXdta3ZvZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTEzMzAsImV4cCI6MjEwMDA2NzMzMH0.JEnZl17WIpPL42fcMRnOx25HRu7zbaUkPilN9PSFhUM';
+const envURL = process.env.SUPABASE_URL;
+const envKey = process.env.SUPABASE_KEY;
+const SUPABASE_URL = (envURL && !envURL.includes('your_supabase')) ? envURL : 'https://fxqrmcinehnuwmkvogcl.supabase.co';
+const SUPABASE_KEY = (envKey && !envKey.includes('your_supabase')) ? envKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4cXJtY2luZWhudXdta3ZvZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0OTEzMzAsImV4cCI6MjEwMDA2NzMzMH0.JEnZl17WIpPL42fcMRnOx25HRu7zbaUkPilN9PSFhUM';
+console.log(`[Bridge] SUPABASE_URL=${SUPABASE_URL.slice(0,30)}...`);
 
 const Q = {
   trending: `query($p:Int,$n:Int){Page(page:$p,perPage:$n){media(sort:TRENDING_DESC,type:ANIME){id idMal title{romaji english native userPreferred}coverImage{extraLarge large}bannerImage description genres averageScore popularity episodes duration status seasonYear season format studios{nodes{name}}}}}`,
