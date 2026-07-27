@@ -365,24 +365,29 @@ async function fetchEpisodeStream(episodeId) {
   }
   console.log('[Bridge] Récupération de la page Sibnet :', ep.embedUrl);
   try {
-    // Fetch shell.php to get the player config with the video URL
+    // Fetch shell.php to get the player config + REAL session cookies
     const agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
     const resp = await fetch(ep.embedUrl, {
-      headers: { 'User-Agent': agent, 'Referer': 'https://sibnet.ru/', 'Cookie': 'sibnet_uid=1; sibnet_hash=1' },
+      headers: { 'User-Agent': agent, 'Referer': 'https://sibnet.ru/' },
       signal: AbortSignal.timeout(15000)
     });
     if (!resp.ok) throw new Error(`Shell ${resp.status}`);
     const html = await resp.text();
+    // Capture ALL cookies set by shell.php (PHPSESSID + any others)
+    let cookies = '';
+    try { cookies = resp.headers.getSetCookie ? resp.headers.getSetCookie().join('; ') : (resp.headers.get('set-cookie') || ''); } catch(e) {}
+    console.log('[Bridge] Cookies Sibnet:', cookies ? cookies.slice(0,120) : '(aucun)');
     // Extract video URL from VideoJS player config: player.src([{src: "/v/hash/videoid.mp4", ...}])
     const srcMatch = html.match(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i);
     if (!srcMatch) throw new Error('Vidéo non trouvée dans la page');
     const videoUrl = resolveUrl(srcMatch[1], ep.embedUrl);
     console.log('[Bridge] URL vidéo extraite :', videoUrl);
-    // Proxy the video through the bridge with proper headers (fixes 403 from hotlink protection)
+    // Proxy the video through the bridge with the REAL session cookies from shell.php
     const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
     const referer = ep.embedUrl;
-    const cookie = 'sibnet_uid=1; sibnet_hash=1';
+    const cookie = cookies || 'sibnet_uid=1; sibnet_hash=1';
     const proxiedLink = `${bridgeOrigin}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(referer)}&cookie=${encodeURIComponent(cookie)}`;
+    console.log('[Bridge] Proxied link created');
     return {
       streamingLink: [{
         link: proxiedLink,
@@ -449,9 +454,11 @@ async function proxyVideo(req, res, url, referer, userAgent, cookie) {
     };
     if (referer) headers['Referer'] = referer;
     if (cookie) headers['Cookie'] = cookie;
+    console.log('[Bridge] Proxy headers:', JSON.stringify({...headers, Cookie: headers.Cookie ? headers.Cookie.slice(0,60)+'...' : '(none)'}));
     // Pass through Range header for seeking support
     if (req.headers['range']) headers['Range'] = req.headers['range'];
     const r = await fetch(url, { headers, signal: AbortSignal.timeout(120000) });
+    console.log('[Bridge] Proxy response status:', r.status);
     if (!r.ok && r.status !== 206) { res.writeHead(502); res.end(JSON.stringify({error:`Amont ${r.status}`})); return; }
     // Forward upstream headers needed by the video player
     const contentType = r.headers.get('content-type') || 'video/mp4';
