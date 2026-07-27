@@ -228,27 +228,15 @@ async function findEpisode(episodeId) {
 async function fetchEpisodeServers(episodeId) {
   const parsed = parseEpisodeId(episodeId);
   if (!parsed) return { episodeId, episodeNo: 0, sub: [], dub: [], raw: [] };
-  const hianimeId = convertToHiAnimeId(episodeId);
-  console.log(`[Bridge] Proxy /servers → HiAnime API: id=${hianimeId}`);
-  try {
-    const resp = await fetch(`${HIANIME_API}/servers/${encodeURIComponent(hianimeId)}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(15000)
-    });
-    if (!resp.ok) return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
-    const json = await resp.json();
-    const data = json.results || json.data || json;
-    return {
-      episodeId,
-      episodeNo: parsed.number,
-      sub: data.sub || [],
-      dub: data.dub || [],
-      raw: data.raw || [],
-    };
-  } catch(e) {
-    console.error('[Bridge] HiAnime servers proxy error:', e.message);
-    return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
-  }
+  const ep = await findEpisode(episodeId);
+  if (!ep || !ep.embedUrl) return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
+  return {
+    episodeId,
+    episodeNo: parsed.number,
+    sub: [{ serverId: 1, serverName: 'Sibnet', type: 'sub' }],
+    dub: [],
+    raw: [],
+  };
 }
 
 async function fetchPageText(url, options = {}) {
@@ -370,44 +358,41 @@ function resolveUrl(url, baseUrl) {
   return base + url;
 }
 
-const HIANIME_API = 'https://aniwatch-api-taupe-eight.vercel.app/api/v2/hianime';
-
-function convertToHiAnimeId(episodeId) {
-  // Our format: {slug}-s{season}-e{number}
-  // HiAnime format: {slug}?ep={number}
-  const m = episodeId.match(/^(.+)-s(\d+)-e(\d+)$/);
-  if (!m) return episodeId;
-  return `${m[1]}?ep=${m[3]}`;
-}
-
 async function fetchEpisodeStream(episodeId, server, category) {
-  const hianimeId = convertToHiAnimeId(episodeId);
-  console.log(`[Bridge] Proxy /stream → HiAnime API: id=${hianimeId} server=${server} type=${category}`);
+  const ep = await findEpisode(episodeId);
+  if (!ep || !ep.embedUrl) {
+    return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
+  }
+  console.log('[Bridge] Extraction vidéo Sibnet :', ep.embedUrl);
   try {
-    const params = new URLSearchParams({ id: hianimeId, server: server || 'hd-1', type: category || 'sub' });
-    const resp = await fetch(`${HIANIME_API}/stream?${params}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(30000)
+    const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+    const resp = await fetch(ep.embedUrl, {
+      headers: { 'User-Agent': ua, 'Referer': 'https://sibnet.ru/' },
+      signal: AbortSignal.timeout(15000)
     });
-    if (!resp.ok) {
-      console.error(`[Bridge] HiAnime API error: ${resp.status}`);
-      return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
-    }
-    const json = await resp.json();
-    // The HiAnime API may return data in different envelopes
-    const data = json.results || json.data || json;
-    console.log(`[Bridge] HiAnime stream response: ${data.streamingLink ? data.streamingLink.length + ' links' : 'no links'}`);
+    if (!resp.ok) throw new Error(`Shell ${resp.status}`);
+    const html = await resp.text();
+    const srcMatch = html.match(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i);
+    if (!srcMatch) throw new Error('Vidéo non trouvée dans la page');
+    const videoUrl = resolveUrl(srcMatch[1], ep.embedUrl);
+    console.log('[Bridge] URL vidéo extraite :', videoUrl);
+    const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+    console.log('[Bridge] URL proxy générée :', `${baseUrl}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(ep.embedUrl)}`);
     return {
-      streamingLink: data.streamingLink || [],
-      referer: data.referer || 'https://megacloud.blog/',
-      tracks: data.tracks || [],
-      anilistID: data.anilistID || null,
-      malID: data.malID || null,
-      intro: data.intro || null,
-      outro: data.outro || null,
+      streamingLink: [{
+        link: `${baseUrl}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(ep.embedUrl)}`,
+        type: 'mp4',
+        server: 'Sibnet'
+      }],
+      referer: ep.embedUrl,
+      tracks: [],
+      anilistID: null,
+      malID: null,
+      intro: null,
+      outro: null,
     };
   } catch(e) {
-    console.error('[Bridge] HiAnime stream proxy error:', e.message);
+    console.error('[Bridge] Échec extraction vidéo Sibnet :', e.message);
     return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
   }
 }
@@ -451,12 +436,11 @@ async function proxyPage(req, res, url) {
 async function proxyVideo(req, res, url, referer, userAgent, cookie) {
   console.log('[Bridge] Proxy de la vidéo :', url);
   try {
-    const headers = {
-      'User-Agent': userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-      'Accept': 'video/mp4,video/webm,video/*,*/*;q=0.8',
-    };
+    const ua = userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+    const headers = { 'User-Agent': ua };
     if (referer) headers['Referer'] = referer;
-    if (cookie) headers['Cookie'] = cookie;
+    // Always send Sibnet cookies – they are required for video auth even if shell.php didn't set them
+    headers['Cookie'] = cookie || 'sibnet_uid=1; sibnet_hash=1';
     console.log('[Bridge] Proxy headers:', JSON.stringify({...headers, Cookie: headers.Cookie ? headers.Cookie.slice(0,60)+'...' : '(none)'}));
     // Pass through Range header for seeking support
     if (req.headers['range']) headers['Range'] = req.headers['range'];
