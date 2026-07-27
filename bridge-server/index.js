@@ -363,25 +363,45 @@ async function fetchEpisodeStream(episodeId) {
   if (!ep || !ep.embedUrl) {
     return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
   }
-  // Proxy the Sibnet shell page through the bridge (handles auth, cookies, JS player)
-  const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-  const proxiedUrl = `${bridgeOrigin}/proxy/page?url=${encodeURIComponent(ep.embedUrl)}`;
-  console.log('[Bridge] Embed Sibnet shell via proxy :', proxiedUrl);
-  return {
-    streamingLink: [{
-      link: proxiedUrl,
-      type: 'mp4',
-      isEmbed: true,
-      server: 'Sibnet',
-      langCode: 'sub-vf'
-    }],
-    referer: ep.embedUrl,
-    tracks: [],
-    anilistID: null,
-    malID: null,
-    intro: null,
-    outro: null,
-  };
+  console.log('[Bridge] Récupération de la page Sibnet :', ep.embedUrl);
+  try {
+    // Fetch shell.php to get the player config with the video URL
+    const agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+    const resp = await fetch(ep.embedUrl, {
+      headers: { 'User-Agent': agent, 'Referer': 'https://sibnet.ru/', 'Cookie': 'sibnet_uid=1; sibnet_hash=1' },
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!resp.ok) throw new Error(`Shell ${resp.status}`);
+    const html = await resp.text();
+    // Extract video URL from VideoJS player config: player.src([{src: "/v/hash/videoid.mp4", ...}])
+    const srcMatch = html.match(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i);
+    if (!srcMatch) throw new Error('Vidéo non trouvée dans la page');
+    const videoUrl = resolveUrl(srcMatch[1], ep.embedUrl);
+    console.log('[Bridge] URL vidéo extraite :', videoUrl);
+    // Proxy the video through the bridge with proper headers (fixes 403 from hotlink protection)
+    const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+    const referer = ep.embedUrl;
+    const cookie = 'sibnet_uid=1; sibnet_hash=1';
+    const proxiedLink = `${bridgeOrigin}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(referer)}&cookie=${encodeURIComponent(cookie)}`;
+    return {
+      streamingLink: [{
+        link: proxiedLink,
+        type: videoUrl.includes('.m3u8') ? 'hls' : 'mp4',
+        isEmbed: false,
+        server: 'Sibnet',
+        langCode: 'sub-vf'
+      }],
+      referer: referer,
+      tracks: [],
+      anilistID: null,
+      malID: null,
+      intro: null,
+      outro: null,
+    };
+  } catch(e) {
+    console.error('[Bridge] Échec extraction vidéo Sibnet :', e.message);
+    return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
+  }
 }
 
 async function proxyPage(req, res, url) {
@@ -420,7 +440,7 @@ async function proxyPage(req, res, url) {
   }
 }
 
-async function proxyVideo(req, res, url, referer, userAgent) {
+async function proxyVideo(req, res, url, referer, userAgent, cookie) {
   console.log('[Bridge] Proxy de la vidéo :', url);
   try {
     const headers = {
@@ -428,6 +448,7 @@ async function proxyVideo(req, res, url, referer, userAgent) {
       'Accept': 'video/mp4,video/webm,video/*,*/*;q=0.8',
     };
     if (referer) headers['Referer'] = referer;
+    if (cookie) headers['Cookie'] = cookie;
     // Pass through Range header for seeking support
     if (req.headers['range']) headers['Range'] = req.headers['range'];
     const r = await fetch(url, { headers, signal: AbortSignal.timeout(120000) });
@@ -470,7 +491,7 @@ const server = createServer(async (req, res) => {
     let path = url.pathname;
 
     // Strip API version prefix(es) so the same bridge works with or without a reverse proxy
-    if (path.startsWith('/api/v2/hianime')) path = path.replace('/api/v2/hianime','') || '/';
+    if (path.startsWith('/api/v2/hianime')) { path = path.replace('/api/v2/hianime','') || '/'; console.log('[Bridge] Path after strip:', path); }
     if (path.startsWith('/api/v2/anime')) path = path.replace('/api/v2/anime','') || '/';
     if (path.startsWith('/api/v2/manga')) path = path.replace('/api/v2/manga','') || '/';
 
@@ -486,7 +507,7 @@ const server = createServer(async (req, res) => {
     if (path.startsWith('/proxy/video')) {
       const videoUrl = url.searchParams.get('url');
       if (!videoUrl) { write({error:'Paramètre url manquant'},400); return; }
-      await proxyVideo(req, res, videoUrl, url.searchParams.get('referer'), url.searchParams.get('userAgent'));
+      await proxyVideo(req, res, videoUrl, url.searchParams.get('referer'), url.searchParams.get('userAgent'), url.searchParams.get('cookie'));
       return;
     }
 
