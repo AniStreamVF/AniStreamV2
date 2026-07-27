@@ -228,15 +228,27 @@ async function findEpisode(episodeId) {
 async function fetchEpisodeServers(episodeId) {
   const parsed = parseEpisodeId(episodeId);
   if (!parsed) return { episodeId, episodeNo: 0, sub: [], dub: [], raw: [] };
-  const ep = await findEpisode(episodeId);
-  if (!ep || !ep.embedUrl) return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
-  return {
-    episodeId,
-    episodeNo: parsed.number,
-    sub: [{ serverId: 1, serverName: 'Sibnet', type: 'sub' }],
-    dub: [],
-    raw: [],
-  };
+  const hianimeId = convertToHiAnimeId(episodeId);
+  console.log(`[Bridge] Proxy /servers → HiAnime API: id=${hianimeId}`);
+  try {
+    const resp = await fetch(`${HIANIME_API}/servers/${encodeURIComponent(hianimeId)}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!resp.ok) return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
+    const json = await resp.json();
+    const data = json.results || json.data || json;
+    return {
+      episodeId,
+      episodeNo: parsed.number,
+      sub: data.sub || [],
+      dub: data.dub || [],
+      raw: data.raw || [],
+    };
+  } catch(e) {
+    console.error('[Bridge] HiAnime servers proxy error:', e.message);
+    return { episodeId, episodeNo: parsed.number, sub: [], dub: [], raw: [] };
+  }
 }
 
 async function fetchPageText(url, options = {}) {
@@ -358,53 +370,44 @@ function resolveUrl(url, baseUrl) {
   return base + url;
 }
 
-async function fetchEpisodeStream(episodeId) {
-  const ep = await findEpisode(episodeId);
-  if (!ep || !ep.embedUrl) {
-    return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
-  }
-  console.log('[Bridge] Récupération de la page Sibnet :', ep.embedUrl);
+const HIANIME_API = 'https://aniwatch-api-taupe-eight.vercel.app/api/v2/hianime';
+
+function convertToHiAnimeId(episodeId) {
+  // Our format: {slug}-s{season}-e{number}
+  // HiAnime format: {slug}?ep={number}
+  const m = episodeId.match(/^(.+)-s(\d+)-e(\d+)$/);
+  if (!m) return episodeId;
+  return `${m[1]}?ep=${m[3]}`;
+}
+
+async function fetchEpisodeStream(episodeId, server, category) {
+  const hianimeId = convertToHiAnimeId(episodeId);
+  console.log(`[Bridge] Proxy /stream → HiAnime API: id=${hianimeId} server=${server} type=${category}`);
   try {
-    // Fetch shell.php to get the player config + REAL session cookies
-    const agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-    const resp = await fetch(ep.embedUrl, {
-      headers: { 'User-Agent': agent, 'Referer': 'https://sibnet.ru/' },
-      signal: AbortSignal.timeout(15000)
+    const params = new URLSearchParams({ id: hianimeId, server: server || 'hd-1', type: category || 'sub' });
+    const resp = await fetch(`${HIANIME_API}/stream?${params}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(30000)
     });
-    if (!resp.ok) throw new Error(`Shell ${resp.status}`);
-    const html = await resp.text();
-    // Capture ALL cookies set by shell.php (PHPSESSID + any others)
-    let cookies = '';
-    try { cookies = resp.headers.getSetCookie ? resp.headers.getSetCookie().join('; ') : (resp.headers.get('set-cookie') || ''); } catch(e) {}
-    console.log('[Bridge] Cookies Sibnet:', cookies ? cookies.slice(0,120) : '(aucun)');
-    // Extract video URL from VideoJS player config: player.src([{src: "/v/hash/videoid.mp4", ...}])
-    const srcMatch = html.match(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i);
-    if (!srcMatch) throw new Error('Vidéo non trouvée dans la page');
-    const videoUrl = resolveUrl(srcMatch[1], ep.embedUrl);
-    console.log('[Bridge] URL vidéo extraite :', videoUrl);
-    // Proxy the video through the bridge with the REAL session cookies from shell.php
-    const bridgeOrigin = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-    const referer = ep.embedUrl;
-    const cookie = cookies || 'sibnet_uid=1; sibnet_hash=1';
-    const proxiedLink = `${bridgeOrigin}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(referer)}&cookie=${encodeURIComponent(cookie)}`;
-    console.log('[Bridge] Proxied link created');
+    if (!resp.ok) {
+      console.error(`[Bridge] HiAnime API error: ${resp.status}`);
+      return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
+    }
+    const json = await resp.json();
+    // The HiAnime API may return data in different envelopes
+    const data = json.results || json.data || json;
+    console.log(`[Bridge] HiAnime stream response: ${data.streamingLink ? data.streamingLink.length + ' links' : 'no links'}`);
     return {
-      streamingLink: [{
-        link: proxiedLink,
-        type: videoUrl.includes('.m3u8') ? 'hls' : 'mp4',
-        isEmbed: false,
-        server: 'Sibnet',
-        langCode: 'sub-vf'
-      }],
-      referer: referer,
-      tracks: [],
-      anilistID: null,
-      malID: null,
-      intro: null,
-      outro: null,
+      streamingLink: data.streamingLink || [],
+      referer: data.referer || 'https://megacloud.blog/',
+      tracks: data.tracks || [],
+      anilistID: data.anilistID || null,
+      malID: data.malID || null,
+      intro: data.intro || null,
+      outro: data.outro || null,
     };
   } catch(e) {
-    console.error('[Bridge] Échec extraction vidéo Sibnet :', e.message);
+    console.error('[Bridge] HiAnime stream proxy error:', e.message);
     return { streamingLink: [], tracks: [], anilistID: null, malID: null, intro: null, outro: null };
   }
 }
@@ -520,7 +523,7 @@ const server = createServer(async (req, res) => {
 
     // Streaming routes must be checked BEFORE /anime/ catch-all
     if (path.startsWith('/servers/')) write(await fetchEpisodeServers(decodeURIComponent(path.slice(9))));
-    else if (path.startsWith('/stream')) write(await fetchEpisodeStream(url.searchParams.get('id')||''));
+    else if (path.startsWith('/stream')) write(await fetchEpisodeStream(url.searchParams.get('id')||'', url.searchParams.get('server')||'', url.searchParams.get('type')||''));
     else if (path==='/'||path==='/home') write(await home());
     else if (path.startsWith('/search')) write(await search(url));
     else if (path.startsWith('/genre/')) write(await genre(url, path.slice(7)));
