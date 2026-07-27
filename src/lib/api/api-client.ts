@@ -541,6 +541,8 @@ export function getProxiedVideoUrl(
   if (videoUrl.includes('/functions/v1/rapid-service')) return videoUrl;
   if (videoUrl.includes('/hindiapi/proxy')) return videoUrl;
   if (isAlreadyGenericM3u8ProxyUrl(videoUrl)) return videoUrl;
+  // Already proxied through our bridge – no double-wrapping needed
+  if (videoUrl.includes('/proxy/video?url=')) return videoUrl;
 
   const upstreamFromExistingProxy = extractUpstreamFromProxyUrl(videoUrl);
   const upstreamUrl = upstreamFromExistingProxy || videoUrl;

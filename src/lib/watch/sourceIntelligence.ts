@@ -408,7 +408,8 @@ export async function preflightSourceUrl(url: string, timeoutMs = 4500): Promise
   if (
     normalizedUrl.includes("/api/v1/streamingproxy") ||
     normalizedUrl.includes("/api/v2/hianime/proxy/m3u8-streaming-proxy") ||
-    normalizedUrl.includes("/api/proxy/m3u8-streaming-proxy")
+    normalizedUrl.includes("/api/proxy/m3u8-streaming-proxy") ||
+    normalizedUrl.includes("/proxy/video?url=")
   ) {
     // Proxy endpoints can reject ranged probes but still succeed for full playback.
     return { ok: true, latencyMs: 0 };
