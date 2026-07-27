@@ -366,21 +366,31 @@ async function fetchEpisodeStream(episodeId, server, category) {
   console.log('[Bridge] Extraction vidéo Sibnet :', ep.embedUrl);
   try {
     const ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-    const resp = await fetch(ep.embedUrl, {
+    const shellResp = await fetch(ep.embedUrl, {
       headers: { 'User-Agent': ua, 'Referer': 'https://sibnet.ru/' },
+      redirect: 'manual',
       signal: AbortSignal.timeout(15000)
     });
-    if (!resp.ok) throw new Error(`Shell ${resp.status}`);
-    const html = await resp.text();
+    if (!shellResp.ok) throw new Error(`Shell ${shellResp.status}`);
+    const html = await shellResp.text();
     const srcMatch = html.match(/player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i);
     if (!srcMatch) throw new Error('Vidéo non trouvée dans la page');
-    const videoUrl = resolveUrl(srcMatch[1], ep.embedUrl);
-    console.log('[Bridge] URL vidéo extraite :', videoUrl);
-    const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-    console.log('[Bridge] URL proxy générée :', `${baseUrl}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(ep.embedUrl)}`);
+    let videoUrl = resolveUrl(srcMatch[1], ep.embedUrl);
+    console.log('[Bridge] URL vidéo initiale :', videoUrl);
+    // Follow GET manually to capture the final CDN URL (with noip=1, no headers required)
+    const mp4Resp = await fetch(videoUrl, { redirect: 'manual', headers: { 'User-Agent': ua, 'Referer': ep.embedUrl, 'Cookie': 'sibnet_uid=1; sibnet_hash=1' }, signal: AbortSignal.timeout(15000) });
+    if (mp4Resp.status >= 300 && mp4Resp.status < 400) {
+      const loc = mp4Resp.headers.get('location');
+      if (loc) {
+        const cdnUrl = resolveUrl(loc, videoUrl);
+        console.log('[Bridge] CDN URL (noip=1) :', cdnUrl.slice(0, 100));
+        videoUrl = cdnUrl;
+      }
+    }
+    console.log('[Bridge] URL CDN finale (sans proxy) :', videoUrl);
     return {
       streamingLink: [{
-        link: `${baseUrl}/proxy/video?url=${encodeURIComponent(videoUrl)}&referer=${encodeURIComponent(ep.embedUrl)}`,
+        link: videoUrl,
         type: 'mp4',
         server: 'Sibnet'
       }],
@@ -461,9 +471,15 @@ async function proxyVideo(req, res, url, referer, userAgent, cookie) {
     if (contentRange) responseHeaders['Content-Range'] = contentRange;
     if (contentLength) responseHeaders['Content-Length'] = contentLength;
     res.writeHead(r.status, responseHeaders);
-    // Stream directly without buffering
-    for await (const chunk of r.body) res.write(chunk);
-    res.end();
+    // Compatible body streaming (Node 18+ with native fetch)
+    const reader = r.body.getReader();
+    (async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) { res.end(); break; }
+        res.write(value);
+      }
+    })();
   } catch(e) {
     res.writeHead(502);
     res.end(JSON.stringify({error: e.message}));

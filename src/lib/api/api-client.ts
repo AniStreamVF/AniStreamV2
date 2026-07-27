@@ -543,6 +543,8 @@ export function getProxiedVideoUrl(
   if (isAlreadyGenericM3u8ProxyUrl(videoUrl)) return videoUrl;
   // Already proxied through our bridge – no double-wrapping needed
   if (videoUrl.includes('/proxy/video?url=')) return videoUrl;
+  // Direct Sibnet CDN URLs with noip=1 work without proxy – skip wrapping
+  if (/sibnet\.ru.*noip=1/i.test(videoUrl)) return videoUrl;
 
   const upstreamFromExistingProxy = extractUpstreamFromProxyUrl(videoUrl);
   const upstreamUrl = upstreamFromExistingProxy || videoUrl;
