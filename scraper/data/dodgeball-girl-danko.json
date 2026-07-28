@@ -1,0 +1,38 @@
+{
+  "slug": "dodgeball-girl-danko",
+  "title": "Dodgeball Girl Danko",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6235901",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6241746",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6247005",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6252212",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

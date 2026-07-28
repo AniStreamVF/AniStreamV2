@@ -1,0 +1,102 @@
+{
+  "slug": "always-a-catch",
+  "title": "Always a Catch!",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6161568",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6166902",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6172808",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6177677",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "title": "Episode 5",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6181859",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 6,
+      "title": "Episode 6",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6186482",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 7,
+      "title": "Episode 7",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6191333",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "title": "Episode 8",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6196958",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 9,
+      "title": "Episode 9",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6203885",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 10,
+      "title": "Episode 10",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6210150",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 11,
+      "title": "Episode 11",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6216255",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 12,
+      "title": "Episode 12",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6221574",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

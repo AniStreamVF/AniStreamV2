@@ -1,0 +1,214 @@
+{
+  "slug": "spice-and-wolf",
+  "title": "Spice and Wolf",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066223",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737536",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066228",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737538",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066233",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737540",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066238",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737542",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "title": "Episode 5",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737544",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "title": "Episode 5",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066242",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 6,
+      "title": "Episode 6",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737545",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 6,
+      "title": "Episode 6",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066247",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 7,
+      "title": "Episode 7",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737547",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 7,
+      "title": "Episode 7",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066250",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "title": "Episode 8",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737550",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "title": "Episode 8",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066254",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 9,
+      "title": "Episode 9",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066263",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 9,
+      "title": "Episode 9",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737552",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 10,
+      "title": "Episode 10",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066272",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 10,
+      "title": "Episode 10",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737554",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 11,
+      "title": "Episode 11",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066274",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 11,
+      "title": "Episode 11",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737558",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 12,
+      "title": "Episode 12",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066282",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 12,
+      "title": "Episode 12",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737559",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 13,
+      "title": "Episode 13",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4737562",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 13,
+      "title": "Episode 13",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=3066288",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    }
+  ]
+}

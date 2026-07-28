@@ -1,0 +1,406 @@
+{
+  "slug": "blue-box",
+  "title": "Blue Box",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://smoothpre.com/embed/8otiukn9q69t",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5700661",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://smoothpre.com/embed/f32vlgretviv",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5710671",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://smoothpre.com/embed/gf4q611bb2q6",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5719166",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://smoothpre.com/embed/uijdhuq9plm6",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5728340",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "title": "Episode 5",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5736981",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "title": "Episode 5",
+      "embedUrl": "https://smoothpre.com/embed/x6r9gal8a7cr",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 6,
+      "title": "Episode 6",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5744145",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 6,
+      "title": "Episode 6",
+      "embedUrl": "https://smoothpre.com/embed/5f3rh04s0gza",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 7,
+      "title": "Episode 7",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5751404",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 7,
+      "title": "Episode 7",
+      "embedUrl": "https://smoothpre.com/embed/j3bg6ol3157c",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "title": "Episode 8",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5758188",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "title": "Episode 8",
+      "embedUrl": "https://smoothpre.com/embed/78y5axb1e2la",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 9,
+      "title": "Episode 9",
+      "embedUrl": "https://smoothpre.com/embed/u9qtm8badfbp",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 9,
+      "title": "Episode 9",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5764352",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 10,
+      "title": "Episode 10",
+      "embedUrl": "https://smoothpre.com/embed/mk82s95v0ylm",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 10,
+      "title": "Episode 10",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5768518",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 11,
+      "title": "Episode 11",
+      "embedUrl": "https://smoothpre.com/embed/f8h5zd82eu87",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 11,
+      "title": "Episode 11",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5772467",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 12,
+      "title": "Episode 12",
+      "embedUrl": "https://smoothpre.com/embed/skpmaeqm9xq8",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 12,
+      "title": "Episode 12",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5777871",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 13,
+      "title": "Episode 13",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5789103",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 13,
+      "title": "Episode 13",
+      "embedUrl": "https://smoothpre.com/embed/aogatrncn575",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 14,
+      "title": "Episode 14",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5794133",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 14,
+      "title": "Episode 14",
+      "embedUrl": "https://smoothpre.com/embed/i0txm4ovqdkr",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 15,
+      "title": "Episode 15",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5799761",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 15,
+      "title": "Episode 15",
+      "embedUrl": "https://smoothpre.com/embed/gk7ipp6grd32",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 16,
+      "title": "Episode 16",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5805080",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 16,
+      "title": "Episode 16",
+      "embedUrl": "https://smoothpre.com/embed/d2bclbj792ea",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 17,
+      "title": "Episode 17",
+      "embedUrl": "https://smoothpre.com/embed/00xir6j1g881",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 17,
+      "title": "Episode 17",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5809817",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 18,
+      "title": "Episode 18",
+      "embedUrl": "https://smoothpre.com/embed/aif249km8tco",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 18,
+      "title": "Episode 18",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5816639",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 19,
+      "title": "Episode 19",
+      "embedUrl": "https://smoothpre.com/embed/1z9w8np6nkwb",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 19,
+      "title": "Episode 19",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5823785",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 20,
+      "title": "Episode 20",
+      "embedUrl": "https://smoothpre.com/embed/3zhh7jvm1obw",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 20,
+      "title": "Episode 20",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5830119",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 21,
+      "title": "Episode 21",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5837463",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 21,
+      "title": "Episode 21",
+      "embedUrl": "https://smoothpre.com/embed/ivtlm1xfniub",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 22,
+      "title": "Episode 22",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5843504",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 22,
+      "title": "Episode 22",
+      "embedUrl": "https://smoothpre.com/embed/u88pze48nnkh",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 23,
+      "title": "Episode 23",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5849878",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 23,
+      "title": "Episode 23",
+      "embedUrl": "https://smoothpre.com/embed/t3gv2b7ux2rh",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 24,
+      "title": "Episode 24",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5855619",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 24,
+      "title": "Episode 24",
+      "embedUrl": "https://smoothpre.com/embed/496vjn6ux5h6",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 25,
+      "title": "Episode 25",
+      "embedUrl": "https://smoothpre.com/embed/k75eg9xsc02o",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 25,
+      "title": "Episode 25",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5862180",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

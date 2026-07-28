@@ -1,0 +1,22 @@
+{
+  "slug": "rascal-does-not-dream-of-a-dreaming-girl",
+  "title": "Rascal Does Not Dream of a Dreaming Girl",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5290184",
+      "season": 1,
+      "lang": "vf",
+      "sources": []
+    },
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=5290185",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "slug": "young-ladies-dont-play-fighting-games",
+  "title": "Young Ladies Don't Play Fighting Games",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6236398",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6242340",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6247513",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

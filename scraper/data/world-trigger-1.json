@@ -1,0 +1,590 @@
+{
+  "slug": "world-trigger-1",
+  "title": "World Trigger",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855353",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855354",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855355",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 4,
+      "title": "Episode 4",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855357",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 5,
+      "title": "Episode 5",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855360",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 6,
+      "title": "Episode 6",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855361",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 7,
+      "title": "Episode 7",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855362",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 8,
+      "title": "Episode 8",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855363",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 9,
+      "title": "Episode 9",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855364",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 10,
+      "title": "Episode 10",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855365",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 11,
+      "title": "Episode 11",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855366",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 12,
+      "title": "Episode 12",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855367",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 13,
+      "title": "Episode 13",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855368",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 14,
+      "title": "Episode 14",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855369",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 15,
+      "title": "Episode 15",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855371",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 16,
+      "title": "Episode 16",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855372",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 17,
+      "title": "Episode 17",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855373",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 18,
+      "title": "Episode 18",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855374",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 19,
+      "title": "Episode 19",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855375",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 20,
+      "title": "Episode 20",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855376",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 21,
+      "title": "Episode 21",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855377",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 22,
+      "title": "Episode 22",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855379",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 23,
+      "title": "Episode 23",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855380",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 24,
+      "title": "Episode 24",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855381",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 25,
+      "title": "Episode 25",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855382",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 26,
+      "title": "Episode 26",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855383",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 27,
+      "title": "Episode 27",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855384",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 28,
+      "title": "Episode 28",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855385",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 29,
+      "title": "Episode 29",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855386",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 30,
+      "title": "Episode 30",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855388",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 31,
+      "title": "Episode 31",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855389",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 32,
+      "title": "Episode 32",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855391",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 33,
+      "title": "Episode 33",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855393",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 34,
+      "title": "Episode 34",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855394",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 35,
+      "title": "Episode 35",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855395",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 36,
+      "title": "Episode 36",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855396",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 37,
+      "title": "Episode 37",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855397",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 38,
+      "title": "Episode 38",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855398",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 39,
+      "title": "Episode 39",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855399",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 40,
+      "title": "Episode 40",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855400",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 41,
+      "title": "Episode 41",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855401",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 42,
+      "title": "Episode 42",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855402",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 43,
+      "title": "Episode 43",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855403",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 44,
+      "title": "Episode 44",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855404",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 45,
+      "title": "Episode 45",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855405",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 46,
+      "title": "Episode 46",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855407",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 47,
+      "title": "Episode 47",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855408",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 48,
+      "title": "Episode 48",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855409",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 49,
+      "title": "Episode 49",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855410",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 50,
+      "title": "Episode 50",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855411",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 51,
+      "title": "Episode 51",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855413",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 52,
+      "title": "Episode 52",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855415",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 53,
+      "title": "Episode 53",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855417",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 54,
+      "title": "Episode 54",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855420",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 55,
+      "title": "Episode 55",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855425",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 56,
+      "title": "Episode 56",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855428",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 57,
+      "title": "Episode 57",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855429",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 58,
+      "title": "Episode 58",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855430",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 59,
+      "title": "Episode 59",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855431",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 60,
+      "title": "Episode 60",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855432",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 61,
+      "title": "Episode 61",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855433",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 62,
+      "title": "Episode 62",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855434",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 63,
+      "title": "Episode 63",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855435",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 64,
+      "title": "Episode 64",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855437",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 65,
+      "title": "Episode 65",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855438",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 66,
+      "title": "Episode 66",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855439",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 67,
+      "title": "Episode 67",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855442",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 68,
+      "title": "Episode 68",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855443",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 69,
+      "title": "Episode 69",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855445",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 70,
+      "title": "Episode 70",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855446",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 71,
+      "title": "Episode 71",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855447",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 72,
+      "title": "Episode 72",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855449",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 73,
+      "title": "Episode 73",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4855450",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

@@ -94,9 +94,9 @@ export default defineConfig(({ mode }) => {
           secure: false,
           rewrite: (p) => p.replace(/^\/api\/providers/, ''),
         },
-        // Same-origin dev proxy → local bridge
+        // Dev proxy → bridge on Render (start bridge locally with PORT=4567 for offline dev)
         '/api/AniStream': {
-          target: 'http://localhost:4567',
+          target: backendOrigin,
           changeOrigin: true,
           secure: false,
           rewrite: (p) => p.replace(/^\/api\/AniStream/, ''),

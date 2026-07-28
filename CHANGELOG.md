@@ -1,20 +1,33 @@
 # Changelog
 
-All notable changes to AniStream are documented here.
+Toutes les évolutions d'AniStream sont consignées ici.
 
 ---
 
-## [1.0] - 27-07-2026
+## [1.0] – 27 juillet 2026
 
-### Added
-- Nouvelle interface — Plongez dans une nouvelle interface fraîche,moderne et customisable
-- Mangas — Vous pouvez maintenant lire tout vos mangas depuis le site
-- Profils — Customisez vos profils a volonté !
-- Social — Vous pouvez accéder au profils des gens vous y abonner
-- Forum / Commentaires — Parler de ce que vous voulez quand vous voulez avec qui vous vouler !
-- Playlist et Watchparties — Partagez vos envies soit via des listes partagé ou via une diffusion partagé !
-- Fluidité — Un travail fou a été fait sur l'optimsiation pour rendre agréable l'utilisation via des skip opening ou des customisation sans limite !
+### Ajouts
+
+Nouvelle interface – Une expérience entièrement repensée, plus épurée, moderne et entièrement personnalisable.
+
+Mangas – Plongez dans vos séries préférées directement depuis le site.
+
+Profils – Personnalisez votre espace comme bon vous semble.
+
+Social – Explorez les profils des autres utilisateurs et abonnez-vous à leurs actualités.
+
+Forum et commentaires – Échangez librement sur vos passions, quand vous voulez et avec qui vous voulez.
+
+Playlists et Watchparties – Partagez vos coups de cœur via des listes collaboratives ou des diffusions synchronisées.
+
+Fluidité – Un travail d'optimisation poussé a été mené pour rendre la navigation plus agréable : saut d'opening, personnalisation avancée, et bien plus encore.
 
 ---
 
+## [1.1] – 28 juillet 2026
 
+### Ajouts
+
+Compatibilité élargie – Des milliers d'épisodes et de nouveaux lecteurs ont été ajoutés, avec la prise en charge de langues supplémentaires.
+
+Historique – Reprenez votre visionnage exactement là où vous l'aviez laissé.

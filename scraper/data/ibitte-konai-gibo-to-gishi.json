@@ -1,0 +1,30 @@
+{
+  "slug": "ibitte-konai-gibo-to-gishi",
+  "title": "Ibitte Konai Gibo to Gishi",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6237310",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6243303",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6248297",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "slug": "fategrand-carnival-1",
+  "title": "Fate/Grand Carnival",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4815641",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=4815652",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}

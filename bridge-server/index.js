@@ -1,6 +1,6 @@
 import { createServer } from 'http';
 
-const PORT = process.env.PORT || 0;
+const PORT = process.env.PORT || 4567;
 const ANILIST_API = 'https://graphql.anilist.co';
 const CACHE = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
@@ -105,7 +105,40 @@ async function search(u) {
 async function anime(idStr) {
   let id = parseInt(idStr);
   if (isNaN(id)) { const m=idStr.match(/^anilist-(\d+)$/); if(m) id=parseInt(m[1]); }
-  if (isNaN(id)) return null;
+
+  // If not an AniList ID, try Supabase lookup by slug
+  if (isNaN(id)) {
+    const rows = await supabaseFetch(`animes?select=slug,title,image,synopsis,genres,year,studios,status&slug=eq.${encodeURIComponent(idStr)}`);
+    if (rows && rows.length > 0) {
+      const a = rows[0];
+      return {
+        anime: {
+          info: {
+            id: a.slug,
+            name: a.title || a.slug,
+            poster: a.image || '',
+            description: (a.synopsis || '').replace(/<[^>]*>/g,''),
+            stats: { rating:'', quality:'HD', episodes:{sub:0,dub:0}, type:'TV', duration:'24m' },
+            malId: null,
+            anilistId: null,
+            promotionalVideos: [],
+            characterVoiceActor: [],
+          },
+          moreInfo: {
+            aired: String(a.year || ''),
+            genres: a.genres || [],
+            status: a.status || '',
+            studios: (a.studios||[]).join(', ') || 'Inconnu',
+            duration: '24m',
+          },
+        },
+        recommendedAnimes: [],
+        relatedAnimes: [],
+      };
+    }
+    return null;
+  }
+
   const d = await gql(Q.anime,{id}), m = d.Media;
   if (!m) return null;
   const rec = (m.recommendations?.nodes||[]).filter(n=>n?.mediaRecommendation).map(n=>n.mediaRecommendation);
@@ -118,15 +151,53 @@ async function genre(u, slug) {
   return { genreName:g, animes:(d.Page?.media||[]).map(toCard), currentPage:pi.currentPage||1, totalPages:pi.lastPage||1, hasNextPage:pi.hasNextPage||false };
 }
 
+function toEpisodes(rows) {
+  const seen = new Map();
+  for (const row of rows) {
+    for (const ep of (row.episodes || [])) {
+      const s = ep.season || 1;
+      const n = ep.number;
+      const key = `${row.slug}-s${s}-e${n}`;
+      if (!seen.has(key)) {
+        seen.set(key, {
+          number: n,
+          title: ep.title || `Épisode ${n}`,
+          episodeId: key,
+          isFiller: false,
+          season: s,
+          lang: ep.lang || 'vf',
+          sources: ep.sources || [],
+          embedUrl: ep.embedUrl || '',
+        });
+      }
+    }
+  }
+  const episodes = [...seen.values()].sort((a,b) => a.season - b.season || a.number - b.number);
+  return {
+    totalEpisodes: episodes.length,
+    episodes: episodes.map(e => ({ number:e.number, title:e.title, episodeId:e.episodeId, isFiller:e.isFiller })),
+    _raw: episodes,
+  };
+}
+
 async function fetchEpisodes(animeId) {
+  // Direct Supabase lookup by slug
+  const rows = await supabaseFetch(`animes?select=slug,episodes&slug=eq.${encodeURIComponent(animeId)}`);
+  if (rows && rows.length > 0) return toEpisodes(rows);
+
+  // Try partial slug match (for anilist-{id} → title → slug matching)
   let id = parseInt(animeId);
   if (isNaN(id)) { const m=animeId.match(/^anilist-(\d+)$/); if(m) id=parseInt(m[1]); }
-  if (isNaN(id)) return {totalEpisodes:0,episodes:[]};
+  if (isNaN(id)) {
+    // Try like search as last resort
+    const rows2 = await supabaseFetch(`animes?select=slug,episodes&slug=like.${encodeURIComponent(animeId + '%')}`);
+    if (rows2 && rows2.length > 0) return toEpisodes(rows2);
+    return {totalEpisodes:0,episodes:[]};
+  }
 
   const d = await gql(Q.anime,{id}), media = d?.Media;
   if (!media) return {totalEpisodes:0,episodes:[]};
 
-  // Try all available titles (english, romaji, userPreferred) for matching
   const titles = [
     media.title?.english,
     media.title?.romaji,
@@ -134,71 +205,24 @@ async function fetchEpisodes(animeId) {
     media.title?.native,
   ].filter(Boolean);
 
-  console.log('[Bridge] FetchEpisodes titles:', titles);
-
-  let rows = null;
   for (const t of titles) {
     const slugBase = toSlug(t);
     if (!slugBase) continue;
-    const supabaseUrl = `animes?select=slug,episodes&slug=like.${encodeURIComponent(slugBase + '%')}`;
-    console.log('[Bridge] Supabase query:', supabaseUrl);
-    rows = await supabaseFetch(supabaseUrl);
-    console.log('[Bridge] Supabase result:', rows ? `found ${rows.length} rows` : 'null');
-    if (rows && rows.length > 0) {
-      console.log('[Bridge] Matched slugs:', rows.map(r => r.slug));
-      break;
-    }
+    const rows3 = await supabaseFetch(`animes?select=slug,episodes&slug=like.${encodeURIComponent(slugBase + '%')}`);
+    if (rows3 && rows3.length > 0) return toEpisodes(rows3);
   }
 
-  if (!rows || rows.length === 0) {
-    console.log('[Bridge] No Supabase match, using placeholder episodes');
-    // Fallback: generate placeholder episodes from AniList data
-    const epCount = media.episodes || media.duration ? 12 : 12;
-    const placeholderEpisodes = [];
-    const slugBase = toSlug(media.title?.userPreferred || media.title?.english || media.title?.romaji || 'anime');
-    for (let i = 1; i <= epCount; i++) {
-      placeholderEpisodes.push({
-        number: i,
-        title: media.duration ? `Épisode ${i}` : `Épisode ${i}`,
-        episodeId: `${slugBase}-s1-e${i}`,
-        isFiller: false,
-        season: 1,
-        lang: 'vf',
-        sources: [],
-        embedUrl: '',
-      });
-    }
-    return {
-      totalEpisodes: placeholderEpisodes.length,
-      episodes: placeholderEpisodes.map(e => ({ number:e.number, title:e.title, episodeId:e.episodeId, isFiller:e.isFiller })),
-      _raw: placeholderEpisodes,
-    };
+  // Fallback: placeholder episodes from AniList
+  const epCount = media.episodes || 12;
+  const slugBase = toSlug(media.title?.userPreferred || media.title?.english || media.title?.romaji || 'anime');
+  const placeholder = [];
+  for (let i = 1; i <= epCount; i++) {
+    placeholder.push({ number:i, title:`Épisode ${i}`, episodeId:`${slugBase}-s1-e${i}`, isFiller:false, season:1, lang:'vf', sources:[], embedUrl:'' });
   }
-
-  const episodes = [];
-  for (const row of rows) {
-    const epList = row.episodes || [];
-    for (const ep of epList) {
-      const seasonNum = ep.season || 1;
-      episodes.push({
-        number: ep.number,
-        title: ep.title || `Épisode ${ep.number}`,
-        episodeId: `${row.slug}-s${seasonNum}-e${ep.number}`,
-        isFiller: false,
-        season: seasonNum,
-        lang: ep.lang || 'vf',
-        sources: ep.sources || [],
-        embedUrl: ep.embedUrl || '',
-      });
-    }
-  }
-
-  episodes.sort((a,b) => a.season - b.season || a.number - b.number);
-
   return {
-    totalEpisodes: episodes.length,
-    episodes: episodes.map(e => ({ number:e.number, title:e.title, episodeId:e.episodeId, isFiller:e.isFiller })),
-    _raw: episodes,
+    totalEpisodes: placeholder.length,
+    episodes: placeholder.map(e => ({ number:e.number, title:e.title, episodeId:e.episodeId, isFiller:e.isFiller })),
+    _raw: placeholder,
   };
 }
 

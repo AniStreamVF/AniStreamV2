@@ -1,0 +1,30 @@
+{
+  "slug": "though-i-am-an-inept-villainess",
+  "title": "Though I Am an Inept Villainess",
+  "episodes": [
+    {
+      "number": 1,
+      "title": "Episode 1",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6241492",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 2,
+      "title": "Episode 2",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6246364",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    },
+    {
+      "number": 3,
+      "title": "Episode 3",
+      "embedUrl": "https://video.sibnet.ru/shell.php?videoid=6251442",
+      "season": 1,
+      "lang": "vostfr",
+      "sources": []
+    }
+  ]
+}
